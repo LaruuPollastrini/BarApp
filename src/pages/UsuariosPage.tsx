@@ -4,6 +4,12 @@ import { useAuth } from "../contexts/AuthContext";
 import type { User, CreateUserDto, UpdateUserDto, Grupo } from "../types";
 import Modal from "../components/Modal";
 
+const isUserAdmin = (user: User) =>
+  user.grupos?.some((g) => g.nombre?.trim().toLowerCase() === "admin") ?? false;
+
+const getAdminGrupoId = (grupos: Grupo[]) =>
+  grupos.find((g) => g.nombre?.trim().toLowerCase() === "admin")?.id;
+
 const UsuariosPage = () => {
   const {
     user: currentUser,
@@ -15,8 +21,10 @@ const UsuariosPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<User | null>(null);
+  const [viewingUsuario, setViewingUsuario] = useState<User | null>(null);
   const [deletingUsuario, setDeletingUsuario] = useState<User | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState<CreateUserDto>({
@@ -141,6 +149,8 @@ const UsuariosPage = () => {
   };
 
   const toggleGrupo = (grupoId: number) => {
+    const adminId = getAdminGrupoId(grupos);
+    if (adminId !== undefined && grupoId === adminId) return; // Admin no se puede asignar
     const currentIds = formData.gruposIds || [];
     if (currentIds.includes(grupoId)) {
       setFormData({
@@ -155,11 +165,7 @@ const UsuariosPage = () => {
     }
   };
 
-  const canDelete = (_usuario: User) => {
-    // Permissions are now handled through modulos/acciones
-    // Users with access to the Usuarios modulo can delete users
-    return true;
-  };
+  const canDelete = (usuario: User) => !isUserAdmin(usuario);
 
   if (loading) {
     return <div className="text-center py-12">Cargando...</div>;
@@ -237,40 +243,56 @@ const UsuariosPage = () => {
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleEdit(usuario)}
-                      disabled={!hasAccessToAccion("Usuarios.Editar Usuario")}
-                      className={`${
-                        hasAccessToAccion("Usuarios.Editar Usuario")
-                          ? "text-blue-600 hover:text-blue-800"
-                          : "text-gray-300 cursor-not-allowed"
-                      }`}
-                      title={
-                        !hasAccessToAccion("Usuarios.Editar Usuario")
-                          ? "No tienes permisos para editar usuarios"
-                          : "Editar"
-                      }
+                      onClick={() => {
+                        setViewingUsuario(usuario);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Ver"
                     >
-                      Editar
+                      Ver
                     </button>
-                    {canDelete(usuario) && (
-                      <button
-                        onClick={() => handleDeleteClick(usuario)}
-                        disabled={
-                          !hasAccessToAccion("Usuarios.Eliminar Usuario")
-                        }
-                        className={`${
-                          hasAccessToAccion("Usuarios.Eliminar Usuario")
-                            ? "text-red-600 hover:text-red-800"
-                            : "text-gray-300 cursor-not-allowed"
-                        }`}
-                        title={
-                          !hasAccessToAccion("Usuarios.Eliminar Usuario")
-                            ? "No tienes permisos para eliminar usuarios"
-                            : "Eliminar"
-                        }
-                      >
-                        Eliminar
-                      </button>
+                    {!isUserAdmin(usuario) && (
+                      <>
+                        <button
+                          onClick={() => handleEdit(usuario)}
+                          disabled={
+                            !hasAccessToAccion("Usuarios.Editar Usuario")
+                          }
+                          className={`${
+                            hasAccessToAccion("Usuarios.Editar Usuario")
+                              ? "text-blue-600 hover:text-blue-800"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                          title={
+                            !hasAccessToAccion("Usuarios.Editar Usuario")
+                              ? "No tienes permisos para editar usuarios"
+                              : "Editar"
+                          }
+                        >
+                          Editar
+                        </button>
+                        {canDelete(usuario) && (
+                          <button
+                            onClick={() => handleDeleteClick(usuario)}
+                            disabled={
+                              !hasAccessToAccion("Usuarios.Eliminar Usuario")
+                            }
+                            className={`${
+                              hasAccessToAccion("Usuarios.Eliminar Usuario")
+                                ? "text-red-600 hover:text-red-800"
+                                : "text-gray-300 cursor-not-allowed"
+                            }`}
+                            title={
+                              !hasAccessToAccion("Usuarios.Eliminar Usuario")
+                                ? "No tienes permisos para eliminar usuarios"
+                                : "Eliminar"
+                            }
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -401,19 +423,36 @@ const UsuariosPage = () => {
                   No hay grupos disponibles
                 </p>
               ) : (
-                grupos.map((grupo) => (
-                  <label key={grupo.id} className="flex items-center py-1">
-                    <input
-                      type="checkbox"
-                      checked={formData.gruposIds?.includes(grupo.id) || false}
-                      onChange={() => toggleGrupo(grupo.id)}
-                      className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">
-                      {grupo.nombre}
-                    </span>
-                  </label>
-                ))
+                grupos.map((grupo) => {
+                  const isAdmin =
+                    grupo.nombre?.trim().toLowerCase() === "admin";
+                  const isChecked =
+                    formData.gruposIds?.includes(grupo.id) || false;
+                  return (
+                    <label
+                      key={grupo.id}
+                      className={`flex items-center py-1 ${
+                        isAdmin ? "opacity-60" : ""
+                      }`}
+                      title={
+                        isAdmin
+                          ? "El grupo Admin no se puede asignar (usuario root único)"
+                          : undefined
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleGrupo(grupo.id)}
+                        disabled={isAdmin}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">
+                        {grupo.nombre}
+                      </span>
+                    </label>
+                  );
+                })
               )}
             </div>
           </div>
@@ -433,6 +472,78 @@ const UsuariosPage = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setViewingUsuario(null);
+        }}
+        title="Ver Usuario"
+      >
+        {viewingUsuario && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-500">
+                Nombre
+              </label>
+              <p className="mt-1 text-gray-900">
+                {viewingUsuario.nombre} {viewingUsuario.apellido}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-500">
+                Correo
+              </label>
+              <p className="mt-1 text-gray-900">{viewingUsuario.correo}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-500">
+                Teléfono
+              </label>
+              <p className="mt-1 text-gray-900">{viewingUsuario.telefono}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-500">
+                Estado
+              </label>
+              <p className="mt-1">
+                <span
+                  className={`px-2 py-1 text-xs rounded-full ${
+                    viewingUsuario.estaActivo
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {viewingUsuario.estaActivo ? "Activo" : "Inactivo"}
+                </span>
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-500">
+                Grupos
+              </label>
+              <p className="mt-1 text-gray-900">
+                {viewingUsuario.grupos?.length
+                  ? viewingUsuario.grupos.map((g) => g.nombre).join(", ")
+                  : "Sin grupos"}
+              </p>
+            </div>
+            <div className="flex justify-end pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsViewModalOpen(false);
+                  setViewingUsuario(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       <Modal
