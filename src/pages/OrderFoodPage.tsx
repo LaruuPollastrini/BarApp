@@ -7,6 +7,7 @@ import {
   mesasApi,
 } from "../services/api";
 import { useCart } from "../contexts/CartContext";
+import { getCategoriaDisplay } from "../utils/categoria";
 import type { Producto, Mesa, Pedido } from "../types";
 import ToastNotification, { ToastType } from "../components/ToastNotification";
 
@@ -439,8 +440,8 @@ const OrderFoodPage = () => {
 
   // Group products by categoria, handling empty strings
   const productosByCategoria = productos.reduce((acc, producto) => {
-    // Use "Sin categoría" for empty categoria strings
-    const categoriaKey = producto.categoria?.trim() || "Otros";
+    const categoriaKey =
+      getCategoriaDisplay(producto.categoriaName);
     if (!acc[categoriaKey]) {
       acc[categoriaKey] = [];
     }
@@ -788,7 +789,7 @@ const OrderFoodPage = () => {
                       >
                         <div className="flex items-center gap-3">
                           <h2 className="text-xl font-bold text-gray-900">
-                            {categoria || "Otros"}
+                            {getCategoriaDisplay(categoria)}
                           </h2>
                           <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                             {productosCount}{" "}

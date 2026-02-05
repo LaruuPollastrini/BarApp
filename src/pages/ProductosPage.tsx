@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { productosApi, categoriasApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { getCategoriaDisplay } from "../utils/categoria";
 import type { Producto, Categoria } from "../types";
 
 interface ProductoFormData {
   nombre: string;
   descripcion: string;
   precio: string;
-  categoria: string;
+  categoriaId: number;
 }
 
 const initialFormData: ProductoFormData = {
   nombre: "",
   descripcion: "",
   precio: "",
-  categoria: "",
+  categoriaId: 0,
 };
 
 const ProductosPage = () => {
@@ -78,15 +79,19 @@ const ProductosPage = () => {
     }
   };
 
-  // Get category names from API categorias
+  // Get category names from API categorias (for filter dropdown)
   const categoryNames = categorias.map((c) => c.nombre);
+
+  // Helper to get display name for producto's categoria
+  const getProductoCategoriaName = (p: Producto) =>
+    getCategoriaDisplay(p.categoriaName);
 
   // Filter products
   const filteredProductos = productos.filter((producto) => {
     const matchesSearch =
       producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       producto.descripcion?.toLowerCase().includes(searchTerm.toLowerCase());
-    const productCategory = producto.categoria?.trim() || "Otros";
+    const productCategory = getProductoCategoriaName(producto);
     const matchesCategory =
       selectedCategory === "all" || productCategory === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -104,7 +109,7 @@ const ProductosPage = () => {
       nombre: producto.nombre,
       descripcion: producto.descripcion || "",
       precio: producto.precio.toString(),
-      categoria: producto.categoria || "",
+      categoriaId: producto.categoriaId ?? 0,
     });
     setIsModalOpen(true);
   };
@@ -129,11 +134,6 @@ const ProductosPage = () => {
       return;
     }
 
-    if (!formData.categoria.trim()) {
-      setError("La categoría es obligatoria");
-      return;
-    }
-
     try {
       setSaving(true);
       setError("");
@@ -141,11 +141,11 @@ const ProductosPage = () => {
       if (editingProducto) {
         // Update
         await productosApi.update({
-          ...editingProducto,
+          id: editingProducto.id,
           nombre: formData.nombre.trim(),
           descripcion: formData.descripcion.trim(),
           precio,
-          categoria: formData.categoria.trim(),
+          categoriaId: formData.categoriaId > 0 ? formData.categoriaId : undefined,
         });
         setSuccessMessage("Producto actualizado correctamente");
       } else {
@@ -154,7 +154,7 @@ const ProductosPage = () => {
           nombre: formData.nombre.trim(),
           descripcion: formData.descripcion.trim(),
           precio,
-          categoria: formData.categoria.trim(),
+          categoriaId: formData.categoriaId > 0 ? formData.categoriaId : undefined,
         });
         setSuccessMessage("Producto creado correctamente");
       }
@@ -404,11 +404,11 @@ const ProductosPage = () => {
                       <span
                         className="px-2 py-1 text-xs font-medium rounded-full"
                         style={{
-                          backgroundColor: getCategoriaColor(producto.categoria || "Otros").bg,
-                          color: getCategoriaColor(producto.categoria || "Otros").text,
+                          backgroundColor: getCategoriaColor(getProductoCategoriaName(producto)).bg,
+                          color: getCategoriaColor(getProductoCategoriaName(producto)).text,
                         }}
                       >
-                        {producto.categoria || "Otros"}
+                        {getProductoCategoriaName(producto)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right font-medium text-gray-900">
@@ -575,22 +575,26 @@ const ProductosPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoría *
+                    Categoría
                   </label>
                   <select
-                    value={formData.categoria}
+                    value={formData.categoriaId || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, categoria: e.target.value })
+                      setFormData({
+                        ...formData,
+                        categoriaId: parseInt(e.target.value, 10) || 0,
+                      })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    required
                   >
-                    <option value="">Selecciona una categoría</option>
-                    {categorias.map((cat) => (
-                      <option key={cat.id} value={cat.nombre}>
-                        {cat.nombre}
-                      </option>
-                    ))}
+                    <option value="">Sin categoría</option>
+                    {categorias
+                      .filter((c) => !c.estaEliminado)
+                      .map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nombre}
+                        </option>
+                      ))}
                   </select>
                   {categorias.length === 0 && (
                     <p className="text-xs text-amber-600 mt-1">

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { productosApi } from "../services/api";
 import { useCart } from "../contexts/CartContext";
 import CartPanel from "../components/CartPanel";
+import { getCategoriaDisplay } from "../utils/categoria";
 import type { Producto } from "../types";
 
 const MenuPage = () => {
@@ -28,10 +29,11 @@ const MenuPage = () => {
 
   // Group productos by categoria
   const productosByCategoria = productos.reduce((acc, producto) => {
-    if (!acc[producto.categoria]) {
-      acc[producto.categoria] = [];
+    const cat = getCategoriaDisplay(producto.categoriaName);
+    if (!acc[cat]) {
+      acc[cat] = [];
     }
-    acc[producto.categoria].push(producto);
+    acc[cat].push(producto);
     return acc;
   }, {} as Record<string, Producto[]>);
 
@@ -144,4 +146,3 @@ const MenuPage = () => {
 };
 
 export default MenuPage;
-

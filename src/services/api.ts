@@ -348,24 +348,32 @@ export const authApi = {
 // Productos
 export const productosApi = {
   getAll: async (): Promise<Producto[]> => {
-    const response = await api.get<Producto[]>("/productos");
-    return response.data;
+    const response = await api.get<Producto[] | string>("/productos");
+    const data = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+    return data ?? [];
   },
   getById: async (id: number): Promise<Producto> => {
-    const response = await api.get<Producto>(`/productos/${id}`);
-    return response.data;
+    const response = await api.get<Producto | string>(`/productos/${id}`);
+    const data = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+    return data;
   },
   create: async (data: {
     nombre: string;
     descripcion: string;
     precio: number;
-    categoria: string;
+    categoriaId?: number | null;
   }): Promise<string> => {
     const response = await api.post("/productos", data);
     return response.data;
   },
-  update: async (producto: Producto): Promise<string> => {
-    const response = await api.put("/productos", producto);
+  update: async (data: {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    categoriaId?: number | null;
+  }): Promise<string> => {
+    const response = await api.put("/productos", data);
     return response.data;
   },
   delete: async (id: number): Promise<string> => {

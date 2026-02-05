@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { pedidosApi, categoriasApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { getCategoriaDisplay } from "../utils/categoria";
 import {
   BarChart,
   Bar,
@@ -401,7 +402,7 @@ const ReportesPage = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {productosStats.map((producto) => {
                             const color = getCategoriaColor(
-                              producto.categoria || "Otros",
+                              getCategoriaDisplay(producto.categoria),
                             );
                             return (
                               <tr key={producto.productoId}>
@@ -416,7 +417,7 @@ const ReportesPage = () => {
                                       color: color.text,
                                     }}
                                   >
-                                    {producto.categoria || "Otros"}
+                                    {getCategoriaDisplay(producto.categoria)}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -497,7 +498,7 @@ const ReportesPage = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {leastOrderedStats.map((producto) => {
                             const color = getCategoriaColor(
-                              producto.categoria || "Otros",
+                              getCategoriaDisplay(producto.categoria),
                             );
                             return (
                               <tr key={producto.productoId}>
@@ -512,7 +513,7 @@ const ReportesPage = () => {
                                       color: color.text,
                                     }}
                                   >
-                                    {producto.categoria || "Otros"}
+                                    {getCategoriaDisplay(producto.categoria)}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -578,7 +579,7 @@ const ReportesPage = () => {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {neverOrderedProducts.map((producto) => {
                           const color = getCategoriaColor(
-                            producto.categoria || "Otros",
+                            getCategoriaDisplay(producto.categoria),
                           );
                           return (
                             <tr key={producto.productoId}>
@@ -593,7 +594,7 @@ const ReportesPage = () => {
                                     color: color.text,
                                   }}
                                 >
-                                  {producto.categoria || "Otros"}
+                                  {getCategoriaDisplay(producto.categoria)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

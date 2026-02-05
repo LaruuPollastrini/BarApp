@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { pedidosApi, productosApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { getCategoriaDisplay } from "../utils/categoria";
 import type { Pedido, Producto, DetallePedidoDto } from "../types";
 
 type EstadoPedido = "Pendiente" | "Confirmado" | "Rechazado";
@@ -148,7 +149,9 @@ const AdminPedidosMesaPage = () => {
 
   // Get unique categories from products
   const categories = Array.from(
-    new Set(productos.map((p) => p.categoria?.trim() || "Otros"))
+    new Set(
+      productos.map((p) => getCategoriaDisplay(p.categoriaName))
+    )
   ).sort();
 
   // Filter products by search and category
@@ -156,7 +159,8 @@ const AdminPedidosMesaPage = () => {
     const matchesSearch = producto.nombre
       .toLowerCase()
       .includes(productSearch.toLowerCase());
-    const productCategory = producto.categoria?.trim() || "Otros";
+    const productCategory =
+      getCategoriaDisplay(producto.categoriaName);
     const matchesCategory =
       selectedCategory === "all" || productCategory === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -643,7 +647,7 @@ const AdminPedidosMesaPage = () => {
                         ${producto.precio.toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-400 truncate">
-                        {producto.categoria || "Otros"}
+                        {getCategoriaDisplay(producto.categoriaName)}
                       </p>
                     </button>
                   ))

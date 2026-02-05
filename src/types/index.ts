@@ -111,7 +111,9 @@ export interface Producto {
   nombre: string;
   descripcion: string;
   precio: number;
-  categoria: string;
+  categoriaId: number | null;
+  /** Nombre de la categoría (BE devuelve "" si no hay) */
+  categoriaName?: string;
   estaEliminado: boolean;
 }
 
