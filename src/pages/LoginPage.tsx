@@ -1,17 +1,26 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { authApi, accionesApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { setUser } = useAuth();
   const [formData, setFormData] = useState({
     correo: "",
     contrasena: "",
   });
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("reset") === "success") {
+      setSuccessMessage("Contraseña actualizada. Ya puedes iniciar sesión.");
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +114,11 @@ const LoginPage = () => {
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-800">{error}</div>
+            </div>
+          )}
+          {successMessage && (
+            <div className="rounded-md bg-green-50 p-4">
+              <div className="text-sm text-green-800">{successMessage}</div>
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">

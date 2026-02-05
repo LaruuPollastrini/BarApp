@@ -302,7 +302,10 @@ export const authApi = {
     return response.data;
   },
   requestPasswordReset: async (correo: string) => {
-    const response = await api.post("/auth/request-password-reset", { correo });
+    const response = await api.post<{ message: string }>(
+      "/auth/request-password-reset",
+      { correo }
+    );
     return response.data;
   },
   resetPassword: async (token: string, newPassword: string) => {

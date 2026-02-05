@@ -35,8 +35,7 @@ const ForgotPasswordPage = () => {
             Recuperar Contraseña
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Ingresa tu correo electrónico y te enviaremos un enlace para
-            restablecer tu contraseña
+            Ingresa tu correo electrónico para restablecer tu contraseña
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -48,8 +47,9 @@ const ForgotPasswordPage = () => {
           {success && (
             <div className="rounded-md bg-green-50 p-4">
               <div className="text-sm text-green-800">
-                Si el correo existe, se enviará un enlace de recuperación. Por
-                favor, revisa tu bandeja de entrada.
+                Si el correo existe en nuestra base de datos, recibirás un
+                enlace para restablecer tu contraseña. Revisa tu bandeja de
+                entrada y spam.
               </div>
             </div>
           )}
