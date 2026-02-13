@@ -8,62 +8,41 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { user, logout, hasAccessToAccion } = useAuth();
+  const { user, logout, hasAccessToSeccion } = useAuth();
   const [securityDropdownOpen, setSecurityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cada tab se muestra solo si el usuario tiene la acción "Ver [X]" correspondiente
+  // Tabs principales: visibles si el usuario tiene al menos una acción de esa sección (Ver, Editar, Agregar, Eliminar, etc.)
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Mesas", href: "/mesas", verAccion: "Mesas.Ver Pedidos" },
-    {
-      name: "Productos",
-      href: "/productos",
-      verAccion: "Productos.Ver Productos",
-    },
-    {
-      name: "Categorías",
-      href: "/categorias",
-      verAccion: "Categorias.Ver Categorias",
-    },
-    { name: "Reportes", href: "/reportes", verAccion: "Reportes.Ver Reportes" },
+    { name: "Mesas", href: "/mesas", seccion: "Mesas" },
+    { name: "Productos", href: "/productos", seccion: "Productos" },
+    { name: "Categorías", href: "/categorias", seccion: "Categorias" },
+    { name: "Reportes", href: "/reportes", seccion: "Reportes" },
   ];
 
   const securityItems = [
-    { name: "Módulos", href: "/modulos", verAccion: "Modulos.Ver Modulos" },
-    {
-      name: "Formularios",
-      href: "/formularios",
-      verAccion: "Formularios.Ver Formularios",
-    },
-    { name: "Acciones", href: "/acciones", verAccion: "Acciones.Ver Acciones" },
-    { name: "Grupos", href: "/grupos", verAccion: "Grupos.Ver Grupos" },
-    { name: "Usuarios", href: "/usuarios", verAccion: "Usuarios.Ver Usuarios" },
+    { name: "Módulos", href: "/modulos", seccion: "Modulos" },
+    { name: "Formularios", href: "/formularios", seccion: "Formularios" },
+    { name: "Acciones", href: "/acciones", seccion: "Acciones" },
+    { name: "Grupos", href: "/grupos", seccion: "Grupos" },
+    { name: "Usuarios", href: "/usuarios", seccion: "Usuarios" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
   const visibleSecurityItems = securityItems.filter(
-    (item) => !item.verAccion || hasAccessToAccion(item.verAccion),
+    (item) => !item.seccion || hasAccessToSeccion(item.seccion),
   );
   const isSecurityActive = visibleSecurityItems.some((item) =>
     isActive(item.href),
   );
 
-  // Debug: qué acciones tiene el usuario y qué tabs del nav son visibles
-  const navVisibility = navigation.map((item) => ({
-    name: item.name,
-    verAccion: "verAccion" in item ? item.verAccion : null,
-    hasAccess:
-      !("verAccion" in item && item.verAccion) ||
-      hasAccessToAccion(item.verAccion as string),
-  }));
-  console.log("[Layout] User permisos para nav", {
-    userId: user?.id,
-    grupos: user?.grupos,
-    accionesAccesiblesCount: user?.accionesAccesibles?.length ?? 0,
-    accionesAccesibles: user?.accionesAccesibles,
-    navVisibility,
-  });
+  const isNavItemVisible = (item: (typeof navigation)[number]) => {
+    if ("seccion" in item && item.seccion) {
+      return hasAccessToSeccion(item.seccion);
+    }
+    return true;
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -96,14 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 {navigation.map((item) => {
-                  // Sin verAccion (ej. Dashboard) siempre se muestra; con verAccion solo si tiene permiso
-                  if (
-                    "verAccion" in item &&
-                    item.verAccion &&
-                    !hasAccessToAccion(item.verAccion)
-                  ) {
-                    return null;
-                  }
+                  if (!isNavItemVisible(item)) return null;
                   return (
                     <Link
                       key={item.name}

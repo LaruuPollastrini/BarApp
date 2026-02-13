@@ -75,7 +75,8 @@ const CategoriasPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nombre.trim()) {
+    const isEdit = editingCategoria != null && Number.isInteger(editingCategoria.id);
+    if (!isEdit && !formData.nombre.trim()) {
       setError("El nombre es obligatorio");
       return;
     }
@@ -84,15 +85,14 @@ const CategoriasPage = () => {
       setSaving(true);
       setError("");
 
-      if (editingCategoria) {
-        // Update
-        await categoriasApi.update(editingCategoria.id, {
-          nombre: formData.nombre.trim(),
+      if (isEdit) {
+        // Siempre PUT al editar: solo actualizar (nombre y/o descripcion)
+        await categoriasApi.update(editingCategoria!.id, {
+          nombre: formData.nombre.trim() || editingCategoria!.nombre,
           descripcion: formData.descripcion.trim() || undefined,
         });
         setSuccessMessage("Categoría actualizada correctamente");
       } else {
-        // Create
         await categoriasApi.create({
           nombre: formData.nombre.trim(),
           descripcion: formData.descripcion.trim() || undefined,

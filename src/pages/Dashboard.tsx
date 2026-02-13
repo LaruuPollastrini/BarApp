@@ -1,72 +1,72 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-/** Módulos principales (misma fuente que el nav del Layout) */
+/** Módulos principales: visibilidad si tiene al menos una acción de esa sección (Ver/Editar/Agregar/Eliminar, etc.) */
 const NAV_ITEMS = [
   {
     name: "Mesas",
     href: "/mesas",
-    verAccion: "Mesas.Ver Pedidos",
+    seccion: "Mesas",
     description: "Ver y gestionar mesas",
     color: "blue" as const,
   },
   {
     name: "Productos",
     href: "/productos",
-    verAccion: "Productos.Ver Productos",
+    seccion: "Productos",
     description: "Gestionar productos",
     color: "green" as const,
   },
   {
     name: "Categorías",
     href: "/categorias",
-    verAccion: "Categorias.Ver Categorias",
+    seccion: "Categorias",
     description: "Gestionar categorías",
     color: "purple" as const,
   },
   {
     name: "Reportes",
     href: "/reportes",
-    verAccion: "Reportes.Ver Reportes",
+    seccion: "Reportes",
     description: "Ver reportes y estadísticas",
     color: "indigo" as const,
   },
 ];
 
-/** Módulo Seguridad (misma fuente que el dropdown del Layout) */
+/** Seguridad: visibilidad si tiene al menos una acción de esa sección (Ver/Crear/Editar/Eliminar) */
 const SEGURIDAD_ITEMS = [
   {
     name: "Módulos",
     href: "/modulos",
-    verAccion: "Modulos.Ver Modulos",
+    seccion: "Modulos",
     description: "Gestionar módulos del sistema",
     color: "blue" as const,
   },
   {
     name: "Formularios",
     href: "/formularios",
-    verAccion: "Formularios.Ver Formularios",
+    seccion: "Formularios",
     description: "Gestionar formularios",
     color: "green" as const,
   },
   {
     name: "Acciones",
     href: "/acciones",
-    verAccion: "Acciones.Ver Acciones",
+    seccion: "Acciones",
     description: "Gestionar acciones",
     color: "purple" as const,
   },
   {
     name: "Grupos",
     href: "/grupos",
-    verAccion: "Grupos.Ver Grupos",
+    seccion: "Grupos",
     description: "Gestionar grupos de usuarios",
     color: "yellow" as const,
   },
   {
     name: "Usuarios",
     href: "/usuarios",
-    verAccion: "Usuarios.Ver Usuarios",
+    seccion: "Usuarios",
     description: "Gestionar usuarios",
     color: "red" as const,
   },
@@ -82,13 +82,13 @@ const BORDER_CLASSES: Record<string, string> = {
 };
 
 const Dashboard = () => {
-  const { hasAccessToAccion } = useAuth();
+  const { hasAccessToSeccion } = useAuth();
 
   const visibleNav = NAV_ITEMS.filter((item) =>
-    hasAccessToAccion(item.verAccion),
+    hasAccessToSeccion(item.seccion),
   );
   const visibleSeguridad = SEGURIDAD_ITEMS.filter((item) =>
-    hasAccessToAccion(item.verAccion),
+    hasAccessToSeccion(item.seccion),
   );
 
   const hasAnyAccess = visibleNav.length > 0 || visibleSeguridad.length > 0;

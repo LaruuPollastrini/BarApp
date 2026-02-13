@@ -50,7 +50,7 @@ function App() {
             <Route
               path="/modulos"
               element={
-                <ProtectedRoute verAccion="Modulos.Ver Modulos">
+                <ProtectedRoute seccion="Modulos">
                   <Layout>
                     <ModulosPage />
                   </Layout>
@@ -60,7 +60,7 @@ function App() {
             <Route
               path="/formularios"
               element={
-                <ProtectedRoute verAccion="Formularios.Ver Formularios">
+                <ProtectedRoute seccion="Formularios">
                   <Layout>
                     <FormulariosPage />
                   </Layout>
@@ -70,7 +70,7 @@ function App() {
             <Route
               path="/acciones"
               element={
-                <ProtectedRoute verAccion="Acciones.Ver Acciones">
+                <ProtectedRoute seccion="Acciones">
                   <Layout>
                     <AccionesPage />
                   </Layout>
@@ -80,7 +80,7 @@ function App() {
             <Route
               path="/grupos"
               element={
-                <ProtectedRoute verAccion="Grupos.Ver Grupos">
+                <ProtectedRoute seccion="Grupos">
                   <Layout>
                     <GruposPage />
                   </Layout>
@@ -90,7 +90,7 @@ function App() {
             <Route
               path="/usuarios"
               element={
-                <ProtectedRoute verAccion="Usuarios.Ver Usuarios">
+                <ProtectedRoute seccion="Usuarios">
                   <Layout>
                     <UsuariosPage />
                   </Layout>
@@ -116,7 +116,7 @@ function App() {
             <Route
               path="/mesas"
               element={
-                <ProtectedRoute verAccion="Mesas.Ver Pedidos">
+                <ProtectedRoute seccion="Mesas">
                   <Layout>
                     <MesasPage />
                   </Layout>
@@ -126,7 +126,7 @@ function App() {
             <Route
               path="/productos"
               element={
-                <ProtectedRoute verAccion="Productos.Ver Productos">
+                <ProtectedRoute seccion="Productos">
                   <Layout>
                     <ProductosPage />
                   </Layout>
@@ -136,7 +136,7 @@ function App() {
             <Route
               path="/categorias"
               element={
-                <ProtectedRoute verAccion="Categorias.Ver Categorias">
+                <ProtectedRoute seccion="Categorias">
                   <Layout>
                     <CategoriasPage />
                   </Layout>
@@ -146,7 +146,7 @@ function App() {
             <Route
               path="/mesas/:numeroMesa/pedidos"
               element={
-                <ProtectedRoute verAccion="Mesas.Ver Pedidos">
+                <ProtectedRoute seccion="Mesas">
                   <Layout>
                     <AdminPedidosMesaPage />
                   </Layout>
@@ -156,7 +156,7 @@ function App() {
             <Route
               path="/mesas/:numeroMesa/historial"
               element={
-                <ProtectedRoute verAccion="Mesas.Ver Historial de Pedidos">
+                <ProtectedRoute seccion="Mesas">
                   <Layout>
                     <MesaHistoryPage />
                   </Layout>
@@ -166,7 +166,7 @@ function App() {
             <Route
               path="/reportes"
               element={
-                <ProtectedRoute verAccion="Reportes.Ver Reportes">
+                <ProtectedRoute seccion="Reportes">
                   <Layout>
                     <ReportesPage />
                   </Layout>

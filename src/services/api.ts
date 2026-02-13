@@ -586,7 +586,7 @@ export const categoriasApi = {
   },
   update: async (
     id: number,
-    data: { nombre: string; descripcion?: string },
+    data: { nombre?: string; descripcion?: string },
   ): Promise<Categoria> => {
     const response = await api.put<Categoria>(`/categorias/${id}`, data);
     return response.data;
