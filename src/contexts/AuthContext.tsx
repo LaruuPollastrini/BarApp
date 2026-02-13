@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authApi } from "../services/api";
+import {
+  SECTION_ACTIONS,
+  getActionName,
+} from "../constants/sectionActions";
 
 export type UserGrupo = { id: number; nombre: string };
 
@@ -21,6 +25,8 @@ interface AuthContextType {
   logout: () => void;
   hasAccessToModulo: (moduloNombre: string) => boolean;
   hasAccessToAccion: (accion: string) => boolean;
+  /** True si el usuario tiene al menos una acción que da acceso a la sección (p.ej. Ver/Editar/Agregar/Eliminar para esa área) */
+  hasAccessToSeccion: (seccion: string) => boolean;
   /** True si el usuario actual pertenece al grupo "Admin" */
   isCurrentUserAdmin: () => boolean;
   refreshPermissions: () => Promise<void>;
@@ -87,36 +93,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const hasAccessToAccion = (accion: string): boolean => {
+  const hasAccessToAccion = (accionRequerida: string): boolean => {
     if (!user) return false;
-    // Si pertenece al grupo Admin, tiene acceso a todas las acciones (no se chequea acción por acción)
     if (isCurrentUserAdmin()) return true;
-    if (!user.accionesAccesibles) {
-      console.log(
-        "[hasAccessToAccion] user.accionesAccesibles vacío o undefined",
-        { accion, userId: user?.id },
-      );
+    if (!user.accionesAccesibles?.length) return false;
+    const nombreRequerido = getActionName(accionRequerida).toLowerCase();
+    return user.accionesAccesibles.some((accionUsuario) => {
+      const nombreUsuario = getActionName(accionUsuario).toLowerCase();
+      return nombreUsuario === nombreRequerido;
+    });
+  };
+
+  const hasAccessToSeccion = (seccion: string): boolean => {
+    if (!user) return false;
+    if (isCurrentUserAdmin()) return true;
+    const accionesPermitidas = SECTION_ACTIONS[seccion];
+    if (!accionesPermitidas?.length || !user.accionesAccesibles?.length)
       return false;
-    }
-    const found = user.accionesAccesibles.some(
-      (accionUsuario) => accionUsuario.toLowerCase() === accion.toLowerCase(),
+    const nombresPermitidos = new Set(
+      accionesPermitidas.map((a) => a.toLowerCase()),
     );
-    if (
-      !found &&
-      [
-        "Mesas.Ver Pedidos",
-        "Productos.Ver Productos",
-        "Categorias.Ver Categorias",
-        "Reportes.Ver Reportes",
-      ].includes(accion)
-    ) {
-      console.log("[hasAccessToAccion] Acción no encontrada para nav", {
-        accionBuscada: accion,
-        totalAcciones: user.accionesAccesibles.length,
-        accionesDisponibles: user.accionesAccesibles,
-      });
-    }
-    return found;
+    return user.accionesAccesibles.some((accionCompleta) => {
+      const nombre = getActionName(accionCompleta).toLowerCase();
+      return nombresPermitidos.has(nombre);
+    });
   };
 
   const isCurrentUserAdmin = (): boolean => {
@@ -173,6 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         hasAccessToModulo,
         hasAccessToAccion,
+        hasAccessToSeccion,
         isCurrentUserAdmin,
         refreshPermissions,
       }}

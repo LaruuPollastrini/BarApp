@@ -3,27 +3,34 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  /** @deprecated Prefer verAccion for consistency with navbar (Ver [X]) */
+  /** @deprecated Prefer verAccion or seccion */
   moduloNombre?: string;
-  /** Acción "Ver [X]" requerida para acceder (ej: "Mesas.Ver Pedidos", "Reportes.Ver Reportes") */
+  /** Acción exacta requerida (ej: "Modulos.Ver Modulos"). Si se usa seccion, no hace falta. */
   verAccion?: string;
+  /** Sección (Mesas, Productos, Categorias, Reportes): acceso si tiene al menos una acción de esa sección */
+  seccion?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   moduloNombre,
   verAccion,
+  seccion,
 }) => {
-  const { user, hasAccessToModulo, hasAccessToAccion } = useAuth();
+  const { user, hasAccessToModulo, hasAccessToAccion, hasAccessToSeccion } =
+    useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
+  if (seccion && !hasAccessToSeccion(seccion)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   if (verAccion && !hasAccessToAccion(verAccion)) {
     return <Navigate to="/dashboard" replace />;
   }
-  if (moduloNombre && !verAccion && !hasAccessToModulo(moduloNombre)) {
+  if (moduloNombre && !verAccion && !seccion && !hasAccessToModulo(moduloNombre)) {
     return <Navigate to="/dashboard" replace />;
   }
 
