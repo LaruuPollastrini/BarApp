@@ -149,8 +149,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <button
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await logout();
                     window.location.href = "/login";
                   }}
                   className="text-sm text-gray-500 hover:text-gray-700"

@@ -21,6 +21,15 @@ import type {
   Mesa,
   Categoria,
   Ticket,
+  TurnoAgenda,
+  CrearTurnoDto,
+  CrearRangoAgendaDto,
+  ResultadoRangoAgenda,
+  Reserva,
+  ReporteSesiones,
+  CambioReserva,
+  ReporteOcupacion,
+  ReporteEstadosReservas,
 } from "../types";
 
 const API_BASE_URL = "http://localhost:3000";
@@ -289,6 +298,11 @@ export const usuariosApi = {
 export const authApi = {
   login: async (correo: string, contrasena: string) => {
     const response = await api.post("/auth/login", { correo, contrasena });
+    return response.data;
+  },
+  /** Cierra la sesión en el backend (invalida el refresh token y queda registrado en la auditoría) */
+  logout: async () => {
+    const response = await api.post("/auth/logout", {});
     return response.data;
   },
   register: async (data: {
@@ -593,6 +607,170 @@ export const categoriasApi = {
   },
   delete: async (id: number): Promise<string> => {
     const response = await api.delete(`/categorias/${id}`);
+    return response.data;
+  },
+};
+
+// =====================================================================
+// RESERVAS (core 2)
+// =====================================================================
+
+// Agenda: turnos que publica el bar
+export const agendaApi = {
+  /** Cliente: turnos activos, futuros y con cupo */
+  getDisponibles: async (): Promise<TurnoAgenda[]> => {
+    const response = await api.get<TurnoAgenda[]>("/agenda");
+    return response.data;
+  },
+  /** Gestión: toda la agenda (opcionalmente entre fechas) */
+  getAll: async (desde?: string, hasta?: string): Promise<TurnoAgenda[]> => {
+    const response = await api.get<TurnoAgenda[]>("/agenda/admin", {
+      params: { desde, hasta },
+    });
+    return response.data;
+  },
+  create: async (data: CrearTurnoDto): Promise<TurnoAgenda> => {
+    const response = await api.post<TurnoAgenda>("/agenda", data);
+    return response.data;
+  },
+  createRango: async (
+    data: CrearRangoAgendaDto,
+  ): Promise<ResultadoRangoAgenda> => {
+    const response = await api.post<ResultadoRangoAgenda>(
+      "/agenda/rango",
+      data,
+    );
+    return response.data;
+  },
+  updateCapacidad: async (
+    idAgenda: number,
+    capacidad: number,
+  ): Promise<TurnoAgenda> => {
+    const response = await api.patch<TurnoAgenda>(
+      `/agenda/${idAgenda}/capacidad`,
+      { capacidad },
+    );
+    return response.data;
+  },
+  delete: async (idAgenda: number): Promise<{ mensaje: string }> => {
+    const response = await api.delete<{ mensaje: string }>(
+      `/agenda/${idAgenda}`,
+    );
+    return response.data;
+  },
+};
+
+// Reservas
+export const reservasApi = {
+  /** Cliente: crear reserva (el cliente sale del token) */
+  create: async (data: {
+    agendaId: number;
+    cantidadPersonas: number;
+  }): Promise<Reserva> => {
+    const response = await api.post<Reserva>("/reservas", data);
+    return response.data;
+  },
+  /** Cliente: mis reservas */
+  getMias: async (): Promise<Reserva[]> => {
+    const response = await api.get<Reserva[]>("/reservas/mias");
+    return response.data;
+  },
+  /** Gestión: todas las reservas con filtros opcionales */
+  getAll: async (filtros?: {
+    estado?: string;
+    desde?: string;
+    hasta?: string;
+  }): Promise<Reserva[]> => {
+    const response = await api.get<Reserva[]>("/reservas", {
+      params: filtros,
+    });
+    return response.data;
+  },
+  /** Recepción: reservas aceptadas y cerradas de un día (sin fecha = hoy) */
+  getDelDia: async (fecha?: string): Promise<Reserva[]> => {
+    const response = await api.get<Reserva[]>("/reservas/del-dia", {
+      params: { fecha },
+    });
+    return response.data;
+  },
+  /** Detalle con historial (dueño o personal del bar) */
+  getById: async (idReserva: number): Promise<Reserva> => {
+    const response = await api.get<Reserva>(`/reservas/${idReserva}`);
+    return response.data;
+  },
+  aceptar: async (idReserva: number): Promise<Reserva> => {
+    const response = await api.patch<Reserva>(
+      `/reservas/${idReserva}/aceptar`,
+    );
+    return response.data;
+  },
+  rechazar: async (idReserva: number): Promise<Reserva> => {
+    const response = await api.patch<Reserva>(
+      `/reservas/${idReserva}/rechazar`,
+    );
+    return response.data;
+  },
+  cerrar: async (idReserva: number): Promise<Reserva> => {
+    const response = await api.patch<Reserva>(
+      `/reservas/${idReserva}/cerrar`,
+    );
+    return response.data;
+  },
+  /** Cliente: cancelar su propia reserva */
+  cancelar: async (idReserva: number): Promise<Reserva> => {
+    const response = await api.patch<Reserva>(
+      `/reservas/${idReserva}/cancelar`,
+    );
+    return response.data;
+  },
+};
+
+// Reportes de reservas
+export const reportesReservaApi = {
+  getOcupacion: async (
+    desde?: string,
+    hasta?: string,
+  ): Promise<ReporteOcupacion> => {
+    const response = await api.get<ReporteOcupacion>(
+      "/reservas/reportes/ocupacion",
+      { params: { desde, hasta } },
+    );
+    return response.data;
+  },
+  getEstados: async (
+    desde?: string,
+    hasta?: string,
+  ): Promise<ReporteEstadosReservas> => {
+    const response = await api.get<ReporteEstadosReservas>(
+      "/reservas/reportes/estados",
+      { params: { desde, hasta } },
+    );
+    return response.data;
+  },
+};
+
+// Auditoría
+export const auditoriaApi = {
+  getSesiones: async (filtros?: {
+    desde?: string;
+    hasta?: string;
+    tipo?: string;
+    usuarioId?: string;
+  }): Promise<ReporteSesiones> => {
+    const response = await api.get<ReporteSesiones>("/auditoria/sesiones", {
+      params: filtros,
+    });
+    return response.data;
+  },
+  getReservas: async (filtros?: {
+    desde?: string;
+    hasta?: string;
+    usuarioId?: string;
+    idReserva?: string;
+  }): Promise<CambioReserva[]> => {
+    const response = await api.get<CambioReserva[]>("/auditoria/reservas", {
+      params: filtros,
+    });
     return response.data;
   },
 };

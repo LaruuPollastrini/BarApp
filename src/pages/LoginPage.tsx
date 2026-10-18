@@ -79,10 +79,7 @@ const LoginPage = () => {
         console.log("Debug Info (detailed):", debugInfo);
         if (accionesMatch) {
           console.log("=== ACCIONES MATCH VERIFICATION ===");
-          console.log("Total in Constants:", accionesMatch.totalInConstants);
           console.log("Total in DB:", accionesMatch.totalInDb);
-          console.log("Missing in DB:", accionesMatch.missingInDb);
-          console.log("Extra in DB:", accionesMatch.extraInDb);
           console.log("===================================");
         }
         console.log("==============================");
@@ -167,6 +164,14 @@ const LoginPage = () => {
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+            <div className="text-sm">
+              <Link
+                to="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                ¿No tienes cuenta? Regístrate
               </Link>
             </div>
           </div>

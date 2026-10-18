@@ -22,7 +22,7 @@ interface AuthContextType {
       grupos?: UserGrupo[];
     } | null,
   ) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   hasAccessToModulo: (moduloNombre: string) => boolean;
   hasAccessToAccion: (accion: string) => boolean;
   /** True si el usuario tiene al menos una acción que da acceso a la sección (p.ej. Ver/Editar/Agregar/Eliminar para esa área) */
@@ -75,7 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user?.id]);
 
-  const logout = () => {
+  const logout = async (): Promise<void> => {
+    // Avisar al backend: invalida el refresh token y registra el cierre de sesión en la auditoría.
+    // Si falla (sin conexión, token vencido), igual se cierra la sesión en el navegador.
+    if (localStorage.getItem("accessToken")) {
+      try {
+        await authApi.logout();
+      } catch (error) {
+        console.error("Error al registrar el cierre de sesión:", error);
+      }
+    }
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");

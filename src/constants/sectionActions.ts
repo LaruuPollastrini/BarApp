@@ -40,7 +40,19 @@ export const SECTION_ACTIONS: Record<string, string[]> = {
     "Ver Productos Menos Pedidos",
     "Ver Productos Nunca Pedidos",
     "Exportar Reportes",
+    "Ver Reporte de Ocupacion",
+    "Ver Reporte de Estados de Reservas",
   ],
+  // Reservas (core 2): cada pantalla visible si tiene al menos una acción de su formulario
+  Reservar: [
+    "Ver Disponibilidad",
+    "Crear Reserva",
+    "Ver Mis Reservas",
+    "Cancelar Mi Reserva",
+  ],
+  Agenda: ["Ver Agenda", "Cargar Disponibilidad", "Eliminar Disponibilidad"],
+  GestionReservas: ["Ver Reservas", "Aceptar Reserva", "Rechazar Reserva"],
+  Recepcion: ["Ver Reservas del Dia", "Cerrar Reserva"],
   // Seguridad: cada subsección visible si tiene al menos una acción de esa área
   Modulos: ["Ver Modulos", "Crear Modulo", "Editar Modulo", "Eliminar Modulo"],
   Formularios: [
@@ -57,6 +69,7 @@ export const SECTION_ACTIONS: Record<string, string[]> = {
     "Editar Usuario",
     "Eliminar Usuario",
   ],
+  Auditoria: ["Ver Auditoria de Sesiones", "Ver Auditoria de Reservas"],
 };
 
 /** Extrae el nombre de la acción (parte después del último punto) */

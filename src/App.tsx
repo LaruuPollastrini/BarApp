@@ -15,6 +15,7 @@ import UsuariosPage from "./pages/UsuariosPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import RegisterPage from "./pages/RegisterPage";
 import MenuPage from "./pages/MenuPage";
 import OrderFoodPage from "./pages/OrderFoodPage";
 import MesasPage from "./pages/MesasPage";
@@ -35,6 +36,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
