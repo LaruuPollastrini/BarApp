@@ -49,6 +49,27 @@ const RESERVAS_ITEMS = [
     description: "Ver y cancelar mis reservas",
     color: "blue" as const,
   },
+  {
+    name: "Agenda",
+    href: "/agenda",
+    seccion: "Agenda",
+    description: "Publicar turnos y administrar su capacidad",
+    color: "purple" as const,
+  },
+  {
+    name: "Gestión de Reservas",
+    href: "/gestion-reservas",
+    seccion: "GestionReservas",
+    description: "Aceptar o rechazar reservas de clientes",
+    color: "indigo" as const,
+  },
+  {
+    name: "Recepción del Día",
+    href: "/recepcion",
+    seccion: "Recepcion",
+    description: "Registrar la llegada de los clientes",
+    color: "yellow" as const,
+  },
 ];
 
 /** Seguridad: visibilidad si tiene al menos una acción de esa sección (Ver/Crear/Editar/Eliminar) */
@@ -100,13 +121,16 @@ const BORDER_CLASSES: Record<string, string> = {
 };
 
 const Dashboard = () => {
-  const { hasAccessToSeccion } = useAuth();
+  const { hasAccessToSeccion, isCurrentUserAdmin } = useAuth();
 
   const visibleNav = NAV_ITEMS.filter((item) =>
     hasAccessToSeccion(item.seccion),
   );
-  const visibleReservas = RESERVAS_ITEMS.filter((item) =>
-    hasAccessToSeccion(item.seccion),
+  // Las pantallas del cliente (sección "Reservar") no se muestran al Admin
+  const visibleReservas = RESERVAS_ITEMS.filter(
+    (item) =>
+      hasAccessToSeccion(item.seccion) &&
+      !(item.seccion === "Reservar" && isCurrentUserAdmin()),
   );
   const visibleSeguridad = SEGURIDAD_ITEMS.filter((item) =>
     hasAccessToSeccion(item.seccion),

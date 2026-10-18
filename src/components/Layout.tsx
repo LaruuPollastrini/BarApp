@@ -8,7 +8,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { user, logout, hasAccessToSeccion } = useAuth();
+  const { user, logout, hasAccessToSeccion, isCurrentUserAdmin } = useAuth();
   const [securityDropdownOpen, setSecurityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [reservasDropdownOpen, setReservasDropdownOpen] = useState(false);
@@ -27,6 +27,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const reservasItems = [
     { name: "Reservar", href: "/reservar", seccion: "Reservar" },
     { name: "Mis Reservas", href: "/mis-reservas", seccion: "Reservar" },
+    { name: "Agenda", href: "/agenda", seccion: "Agenda" },
+    {
+      name: "Gestión de Reservas",
+      href: "/gestion-reservas",
+      seccion: "GestionReservas",
+    },
+    { name: "Recepción del Día", href: "/recepcion", seccion: "Recepcion" },
   ];
 
   const securityItems = [
@@ -44,8 +51,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isSecurityActive = visibleSecurityItems.some((item) =>
     isActive(item.href),
   );
-  const visibleReservasItems = reservasItems.filter((item) =>
-    hasAccessToSeccion(item.seccion),
+  // Las pantallas del cliente (sección "Reservar") no se muestran al Admin
+  const visibleReservasItems = reservasItems.filter(
+    (item) =>
+      hasAccessToSeccion(item.seccion) &&
+      !(item.seccion === "Reservar" && isCurrentUserAdmin()),
   );
   const isReservasActive = visibleReservasItems.some((item) =>
     isActive(item.href),
