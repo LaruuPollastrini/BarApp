@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { rutaInicial } from "../constants/sectionActions";
 
 interface RegisterFormData {
   nombre: string;
@@ -78,7 +79,7 @@ const RegisterPage = () => {
         console.error("Error fetching permissions:", err);
       }
 
-      setUser({
+      const userData = {
         id: response.user.id,
         modulosAccesibles: response.user.modulosAccesibles || [],
         accionesAccesibles,
@@ -88,9 +89,11 @@ const RegisterPage = () => {
               nombre: g.nombre,
             }))
           : [],
-      });
+      };
+      setUser(userData);
 
-      navigate("/dashboard");
+      // Clientes van directo a reservar
+      navigate(rutaInicial(accionesAccesibles, userData.grupos));
     } catch (err: any) {
       setError(err.response?.data?.message || "Error al registrarse");
     } finally {

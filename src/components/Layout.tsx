@@ -11,6 +11,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout, hasAccessToSeccion } = useAuth();
   const [securityDropdownOpen, setSecurityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [reservasDropdownOpen, setReservasDropdownOpen] = useState(false);
+  const reservasDropdownRef = useRef<HTMLDivElement>(null);
 
   // Tabs principales: visibles si el usuario tiene al menos una acción de esa sección (Ver, Editar, Agregar, Eliminar, etc.)
   const navigation = [
@@ -19,6 +21,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: "Productos", href: "/productos", seccion: "Productos" },
     { name: "Categorías", href: "/categorias", seccion: "Categorias" },
     { name: "Reportes", href: "/reportes", seccion: "Reportes" },
+  ];
+
+  // Reservas: cada ítem visible si el usuario tiene al menos una acción de esa sección
+  const reservasItems = [
+    { name: "Reservar", href: "/reservar", seccion: "Reservar" },
+    { name: "Mis Reservas", href: "/mis-reservas", seccion: "Reservar" },
   ];
 
   const securityItems = [
@@ -34,6 +42,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     (item) => !item.seccion || hasAccessToSeccion(item.seccion),
   );
   const isSecurityActive = visibleSecurityItems.some((item) =>
+    isActive(item.href),
+  );
+  const visibleReservasItems = reservasItems.filter((item) =>
+    hasAccessToSeccion(item.seccion),
+  );
+  const isReservasActive = visibleReservasItems.some((item) =>
     isActive(item.href),
   );
 
@@ -64,6 +78,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
   }, [securityDropdownOpen]);
 
+  // Cerrar el menú de Reservas al hacer clic afuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        reservasDropdownRef.current &&
+        !reservasDropdownRef.current.contains(event.target as Node)
+      ) {
+        setReservasDropdownOpen(false);
+      }
+    };
+
+    if (reservasDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [reservasDropdownOpen]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -90,6 +124,60 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </Link>
                   );
                 })}
+
+                {/* Reservas Dropdown - solo se muestra si hay al menos un ítem visible */}
+                {visibleReservasItems.length > 0 && (
+                  <div className="relative flex" ref={reservasDropdownRef}>
+                    <button
+                      onClick={() =>
+                        setReservasDropdownOpen(!reservasDropdownOpen)
+                      }
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                        isReservasActive
+                          ? "border-blue-500 text-gray-900"
+                          : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                      }`}
+                    >
+                      Reservas
+                      <svg
+                        className={`ml-1 h-4 w-4 transition-transform ${
+                          reservasDropdownOpen ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+
+                    {reservasDropdownOpen && (
+                      <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div className="py-1">
+                          {visibleReservasItems.map((item) => (
+                            <Link
+                              key={item.name}
+                              to={item.href}
+                              onClick={() => setReservasDropdownOpen(false)}
+                              className={`block px-4 py-2 text-sm ${
+                                isActive(item.href)
+                                  ? "bg-blue-50 text-blue-700 font-medium"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              }`}
+                            >
+                              {item.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Security Dropdown - solo se muestra si hay al menos un ítem visible */}
                 {visibleSecurityItems.length > 0 && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { authApi, accionesApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { rutaInicial } from "../constants/sectionActions";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -87,8 +88,8 @@ const LoginPage = () => {
         console.error("Error fetching debug info:", err);
       }
 
-      // Redirect to dashboard
-      navigate("/dashboard");
+      // Clientes van directo a reservar; el personal, al Dashboard
+      navigate(rutaInicial(accionesAccesibles, userData.grupos));
     } catch (err: any) {
       setError(err.response?.data?.message || "Error al iniciar sesión");
     } finally {

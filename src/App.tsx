@@ -16,6 +16,8 @@ import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
+import ReservarPage from "./pages/ReservarPage";
+import MisReservasPage from "./pages/MisReservasPage";
 import MenuPage from "./pages/MenuPage";
 import OrderFoodPage from "./pages/OrderFoodPage";
 import MesasPage from "./pages/MesasPage";
@@ -161,6 +163,26 @@ function App() {
                 <ProtectedRoute seccion="Mesas">
                   <Layout>
                     <MesaHistoryPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reservar"
+              element={
+                <ProtectedRoute seccion="Reservar">
+                  <Layout>
+                    <ReservarPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mis-reservas"
+              element={
+                <ProtectedRoute seccion="Reservar">
+                  <Layout>
+                    <MisReservasPage />
                   </Layout>
                 </ProtectedRoute>
               }

@@ -33,6 +33,24 @@ const NAV_ITEMS = [
   },
 ];
 
+/** Reservas: cada tarjeta visible si tiene al menos una acción de esa sección */
+const RESERVAS_ITEMS = [
+  {
+    name: "Reservar",
+    href: "/reservar",
+    seccion: "Reservar",
+    description: "Reservar una mesa en un turno disponible",
+    color: "green" as const,
+  },
+  {
+    name: "Mis Reservas",
+    href: "/mis-reservas",
+    seccion: "Reservar",
+    description: "Ver y cancelar mis reservas",
+    color: "blue" as const,
+  },
+];
+
 /** Seguridad: visibilidad si tiene al menos una acción de esa sección (Ver/Crear/Editar/Eliminar) */
 const SEGURIDAD_ITEMS = [
   {
@@ -87,11 +105,17 @@ const Dashboard = () => {
   const visibleNav = NAV_ITEMS.filter((item) =>
     hasAccessToSeccion(item.seccion),
   );
+  const visibleReservas = RESERVAS_ITEMS.filter((item) =>
+    hasAccessToSeccion(item.seccion),
+  );
   const visibleSeguridad = SEGURIDAD_ITEMS.filter((item) =>
     hasAccessToSeccion(item.seccion),
   );
 
-  const hasAnyAccess = visibleNav.length > 0 || visibleSeguridad.length > 0;
+  const hasAnyAccess =
+    visibleNav.length > 0 ||
+    visibleReservas.length > 0 ||
+    visibleSeguridad.length > 0;
 
   return (
     <div>
@@ -115,6 +139,28 @@ const Dashboard = () => {
               </h2>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleNav.map((card) => (
+                  <Link
+                    key={card.href}
+                    to={card.href}
+                    className={`block rounded-lg shadow-md border-2 p-6 text-gray-900 transition-colors ${
+                      BORDER_CLASSES[card.color]
+                    }`}
+                  >
+                    <h3 className="text-xl font-semibold mb-2">{card.name}</h3>
+                    <p className="text-gray-600 text-sm">{card.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {visibleReservas.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">
+                Reservas
+              </h2>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {visibleReservas.map((card) => (
                   <Link
                     key={card.href}
                     to={card.href}

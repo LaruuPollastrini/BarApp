@@ -77,3 +77,27 @@ export function getActionName(accionCompleta: string): string {
   const idx = accionCompleta.lastIndexOf(".");
   return idx >= 0 ? accionCompleta.slice(idx + 1).trim() : accionCompleta.trim();
 }
+
+/**
+ * Pantalla de inicio después del login según los permisos del usuario:
+ * - Si SOLO tiene permisos de cliente (sección "Reservar"), va directo a reservar.
+ * - Admin y personal del bar van al Dashboard.
+ */
+export function rutaInicial(
+  accionesAccesibles: string[],
+  grupos: Array<{ nombre: string }>,
+): string {
+  const esAdmin = grupos.some(
+    (g) => g.nombre?.trim().toLowerCase() === "admin",
+  );
+  if (esAdmin) return "/dashboard";
+
+  const accionesCliente = new Set(
+    SECTION_ACTIONS.Reservar.map((a) => a.toLowerCase()),
+  );
+  const nombres = accionesAccesibles.map((a) => getActionName(a).toLowerCase());
+  const tieneCliente = nombres.some((n) => accionesCliente.has(n));
+  const tieneOtras = nombres.some((n) => !accionesCliente.has(n));
+
+  return tieneCliente && !tieneOtras ? "/reservar" : "/dashboard";
+}
