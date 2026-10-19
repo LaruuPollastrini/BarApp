@@ -42,6 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: "Acciones", href: "/acciones", seccion: "Acciones" },
     { name: "Grupos", href: "/grupos", seccion: "Grupos" },
     { name: "Usuarios", href: "/usuarios", seccion: "Usuarios" },
+    { name: "Auditoría", href: "/auditoria", seccion: "Auditoria" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

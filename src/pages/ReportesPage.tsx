@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { pedidosApi, categoriasApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { getCategoriaDisplay } from "../utils/categoria";
+import ReporteOcupacionReservas from "../components/reportes/ReporteOcupacionReservas";
+import ReporteEstadosReservas from "../components/reportes/ReporteEstadosReservas";
 import {
   BarChart,
   Bar,
@@ -56,7 +58,9 @@ type ReportTabKey =
   | "menos-pedidos"
   | "nunca-pedidos"
   | "ingresos"
-  | "ticket";
+  | "ticket"
+  | "ocupacion-reservas"
+  | "estados-reservas";
 
 const REPORT_TABS: { key: ReportTabKey; label: string; action: string }[] = [
   {
@@ -83,6 +87,16 @@ const REPORT_TABS: { key: ReportTabKey; label: string; action: string }[] = [
     key: "ticket",
     label: "Ticket Promedio",
     action: "Reportes.Ticket Promedio",
+  },
+  {
+    key: "ocupacion-reservas",
+    label: "Ocupación de Turnos",
+    action: "Reportes.Ver Reporte de Ocupacion",
+  },
+  {
+    key: "estados-reservas",
+    label: "Estados de Reservas",
+    action: "Reportes.Ver Reporte de Estados de Reservas",
   },
 ];
 
@@ -613,6 +627,10 @@ const ReportesPage = () => {
               )}
             </div>
           )}
+
+          {/* Reportes de Reservas (cada uno carga sus propios datos) */}
+          {activeTab === "ocupacion-reservas" && <ReporteOcupacionReservas />}
+          {activeTab === "estados-reservas" && <ReporteEstadosReservas />}
 
           {/* Reporte de Ingresos Tab */}
           {activeTab === "ingresos" && (

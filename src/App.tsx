@@ -18,6 +18,10 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
 import ReservarPage from "./pages/ReservarPage";
 import MisReservasPage from "./pages/MisReservasPage";
+import AgendaPage from "./pages/AgendaPage";
+import GestionReservasPage from "./pages/GestionReservasPage";
+import RecepcionPage from "./pages/RecepcionPage";
+import AuditoriaPage from "./pages/AuditoriaPage";
 import MenuPage from "./pages/MenuPage";
 import OrderFoodPage from "./pages/OrderFoodPage";
 import MesasPage from "./pages/MesasPage";
@@ -183,6 +187,46 @@ function App() {
                 <ProtectedRoute seccion="Reservar">
                   <Layout>
                     <MisReservasPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agenda"
+              element={
+                <ProtectedRoute seccion="Agenda">
+                  <Layout>
+                    <AgendaPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestion-reservas"
+              element={
+                <ProtectedRoute seccion="GestionReservas">
+                  <Layout>
+                    <GestionReservasPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recepcion"
+              element={
+                <ProtectedRoute seccion="Recepcion">
+                  <Layout>
+                    <RecepcionPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/auditoria"
+              element={
+                <ProtectedRoute seccion="Auditoria">
+                  <Layout>
+                    <AuditoriaPage />
                   </Layout>
                 </ProtectedRoute>
               }

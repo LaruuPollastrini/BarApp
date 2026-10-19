@@ -109,6 +109,13 @@ const SEGURIDAD_ITEMS = [
     description: "Gestionar usuarios",
     color: "red" as const,
   },
+  {
+    name: "Auditoría",
+    href: "/auditoria",
+    seccion: "Auditoria",
+    description: "Accesos al sistema y trazabilidad de reservas",
+    color: "indigo" as const,
+  },
 ];
 
 const BORDER_CLASSES: Record<string, string> = {
