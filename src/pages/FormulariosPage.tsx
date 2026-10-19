@@ -33,9 +33,16 @@ const FormulariosPage = () => {
     accionesIds: [],
   });
 
+  const [busquedaAccion, setBusquedaAccion] = useState("");
+
   useEffect(() => {
     loadData();
   }, []);
+
+  // Al abrir el modal, el buscador de acciones arranca vacío
+  useEffect(() => {
+    if (isModalOpen) setBusquedaAccion("");
+  }, [isModalOpen]);
 
   const loadData = async () => {
     try {
@@ -109,6 +116,50 @@ const FormulariosPage = () => {
       console.error("Error saving formulario:", error);
     }
   };
+
+  // ---------- Organización de la lista de acciones (solo visual) ----------
+  // Una acción pertenece a un módulo a través de los formularios de ese módulo.
+  const moduloSeleccionado = modulos.find((m) => m.id === formData.moduloId);
+
+  const idsAccionesDelModulo = new Set<number>(
+    formularios
+      .filter((f) => f.modulo?.id === formData.moduloId)
+      .flatMap((f) => (f.acciones || []).map((a) => a.id)),
+  );
+
+  const textoBusqueda = busquedaAccion.trim().toLowerCase();
+  const accionesFiltradas = acciones
+    .filter((a) => a.nombre.toLowerCase().includes(textoBusqueda))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+
+  const accionesDelModulo = accionesFiltradas.filter((a) =>
+    idsAccionesDelModulo.has(a.id),
+  );
+  const otrasAcciones = accionesFiltradas.filter(
+    (a) => !idsAccionesDelModulo.has(a.id),
+  );
+
+  const cantidadMarcadas = (formData.accionesIds ?? []).length;
+
+  const renderAccion = (accion: Accion) => (
+    <li key={accion.id}>
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={(formData.accionesIds ?? []).includes(accion.id)}
+          onChange={() => toggleAccion(accion.id)}
+          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+        />
+        <span className="text-sm text-gray-800">{accion.nombre}</span>
+      </label>
+    </li>
+  );
+
+  const tituloBloque = (texto: string, cantidad: number) => (
+    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+      {texto} ({cantidad})
+    </p>
+  );
 
   const toggleAccion = (accionId: number) => {
     const current = formData.accionesIds ?? [];
@@ -309,37 +360,68 @@ const FormulariosPage = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Acciones asignadas
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Acciones asignadas
+              </label>
+              <span className="text-xs text-gray-500">
+                {cantidadMarcadas} marcada{cantidadMarcadas !== 1 ? "s" : ""}
+              </span>
+            </div>
             <p className="text-xs text-gray-500 mb-2">
               Marca las acciones que pertenecen a este formulario.
             </p>
-            <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
+            <input
+              type="text"
+              value={busquedaAccion}
+              onChange={(e) => setBusquedaAccion(e.target.value)}
+              placeholder="Buscar acción..."
+              className="mb-2 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+            />
+            <div className="max-h-64 overflow-y-auto border border-gray-300 rounded-md p-2">
               {acciones.length === 0 ? (
                 <p className="text-sm text-gray-500">
                   No hay acciones disponibles
                 </p>
+              ) : accionesFiltradas.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  Ninguna acción coincide con "{busquedaAccion}"
+                </p>
+              ) : !moduloSeleccionado ? (
+                <>
+                  {tituloBloque("Todas las acciones", accionesFiltradas.length)}
+                  <ul className="space-y-1">
+                    {accionesFiltradas.map(renderAccion)}
+                  </ul>
+                </>
               ) : (
-                <ul className="space-y-1">
-                  {acciones.map((accion) => (
-                    <li key={accion.id}>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={(formData.accionesIds ?? []).includes(
-                            accion.id,
-                          )}
-                          onChange={() => toggleAccion(accion.id)}
-                          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                        />
-                        <span className="text-sm text-gray-800">
-                          {accion.nombre}
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  {accionesDelModulo.length > 0 && (
+                    <div className="mb-3">
+                      {tituloBloque(
+                        `Acciones del módulo ${moduloSeleccionado.nombre}`,
+                        accionesDelModulo.length,
+                      )}
+                      <ul className="space-y-1">
+                        {accionesDelModulo.map(renderAccion)}
+                      </ul>
+                    </div>
+                  )}
+                  {otrasAcciones.length > 0 && (
+                    <div
+                      className={
+                        accionesDelModulo.length > 0
+                          ? "pt-3 border-t border-gray-200"
+                          : ""
+                      }
+                    >
+                      {tituloBloque("Otras acciones", otrasAcciones.length)}
+                      <ul className="space-y-1">
+                        {otrasAcciones.map(renderAccion)}
+                      </ul>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
